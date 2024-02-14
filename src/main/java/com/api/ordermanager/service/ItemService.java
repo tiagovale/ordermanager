@@ -22,6 +22,10 @@ public class ItemService {
 		return repository.findAll();
 	}
 
+	public Optional<Item> getById(Long id) {
+		return repository.findById(id);
+	}
+	
 	@Transactional
 	public Item create(ItemDto itemDto) {
 

@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.api.ordermanager.dto.StockMovementDto;
 import com.api.ordermanager.mapper.StockMovementMapper;
+import com.api.ordermanager.model.Item;
 import com.api.ordermanager.model.StockMovement;
 import com.api.ordermanager.repository.StockMovementRepository;
 
@@ -17,6 +18,9 @@ public class StockMovementService {
 
 	@Autowired
 	private StockMovementRepository repository;
+
+	@Autowired
+	private ItemService itemService;
 
 	public List<StockMovement> getAll() {
 		return repository.findAll();
@@ -60,5 +64,21 @@ public class StockMovementService {
 			System.out.println("Error message" + e.getMessage());
 		}
 
+	}
+
+	public boolean checkItemAndQuantity(Long itemId, Integer quantity) {
+
+		Optional<Item> itemFound = itemService.getById(itemId);
+		if (itemFound.isPresent()) {
+			Optional<StockMovement> stockMovement = repository.findByItemId(itemFound.get().getId());
+			if (stockMovement.isPresent()) {
+
+				long stockQuantity = stockMovement.get().getQuantity();
+				return quantity > stockQuantity ? false : true;
+
+			}
+		}
+
+		return false;
 	}
 }

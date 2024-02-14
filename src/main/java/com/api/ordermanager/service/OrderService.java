@@ -18,6 +18,9 @@ public class OrderService {
 	@Autowired
 	private OrderRepository repository;
 
+	@Autowired
+	private StockMovementService stockMovementService;
+
 	public List<Order> getAll() {
 		return repository.findAll();
 	}
@@ -26,6 +29,9 @@ public class OrderService {
 	public Order create(OrderDto orderDto) {
 
 		try {
+			if(!isThereItemInStock(orderDto)) {
+				throw new Exception("The order of the product is greater than the stock quantity");
+			}
 			Order order = OrderMapper.mapToEntity(orderDto);
 			return repository.save(order);
 		} catch (Exception e) {
@@ -34,6 +40,15 @@ public class OrderService {
 
 		return null;
 
+	}
+
+	private boolean isThereItemInStock(OrderDto orderDto) {
+		boolean teste = stockMovementService.checkItemAndQuantity(orderDto.getItem().getId(), orderDto.getQuantity());
+		if(teste) {
+			return true;
+		}
+
+		return false;
 	}
 
 	public void update(Long id, OrderDto orderDto) throws Exception {

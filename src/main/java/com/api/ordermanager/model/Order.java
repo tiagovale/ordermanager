@@ -2,6 +2,7 @@ package com.api.ordermanager.model;
 
 import java.time.LocalDateTime;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
@@ -12,12 +13,13 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 @Entity
-@Table(name = "orders")
+@Table(name = "Orders")
 public class Order {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
+	@Column(name="creation_date")
 	private LocalDateTime creationDate;
 
 	@ManyToOne
@@ -26,7 +28,7 @@ public class Order {
 
 	private Integer quantity;
 
-	@ManyToOne(fetch = FetchType.LAZY) // Assuming many orders can have one user
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "user_id", nullable = false)
 	private User user;
 

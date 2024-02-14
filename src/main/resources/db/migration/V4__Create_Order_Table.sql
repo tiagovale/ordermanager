@@ -1,9 +1,9 @@
-CREATE TABLE "Order" (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    creationDate TIMESTAMP NOT NULL,
-    item_id INT NOT NULL,
-    quantity INT NOT NULL,
-    user_id INT NOT NULL,
-    FOREIGN KEY (item_id) REFERENCES Item(id),
-    FOREIGN KEY (user_id) REFERENCES User(id)
+CREATE TABLE orders (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    creation_date TIMESTAMP,
+    item_id BIGINT,
+    quantity INTEGER,
+    user_id BIGINT NOT NULL,
+    FOREIGN KEY (item_id) REFERENCES item(id),
+    FOREIGN KEY (user_id) REFERENCES users(id)
 );
