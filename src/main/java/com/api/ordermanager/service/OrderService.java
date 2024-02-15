@@ -26,29 +26,28 @@ public class OrderService {
 	}
 
 	@Transactional
-	public Order create(OrderDto orderDto) {
+	public Order create(OrderDto orderDto) throws Exception {
 
-		try {
-			if(!isThereItemInStock(orderDto)) {
-				throw new Exception("The order of the product is greater than the stock quantity");
-			}
-			Order order = OrderMapper.mapToEntity(orderDto);
-			return repository.save(order);
-		} catch (Exception e) {
-			System.out.println("Error message" + e.getMessage());
-		}
+		validateStockQuantity(orderDto);
+		updateStock(orderDto.getItem().getId(), orderDto.getQuantity());
 
-		return null;
+		Order order = OrderMapper.mapToEntity(orderDto);
+		return repository.save(order);
 
 	}
 
-	private boolean isThereItemInStock(OrderDto orderDto) {
-		boolean teste = stockMovementService.checkItemAndQuantity(orderDto.getItem().getId(), orderDto.getQuantity());
-		if(teste) {
-			return true;
-		}
+	private void updateStock(Long itemId, Integer orderQuantity) {
+	
+		stockMovementService.updateQuantity(itemId,
+				orderQuantity);
+	}
 
-		return false;
+	private void validateStockQuantity(OrderDto orderDto) throws Exception {
+		boolean isStockGreaterThanOrder = stockMovementService.checkItemAndQuantity(orderDto.getItem().getId(),
+				orderDto.getQuantity());
+		if (!isStockGreaterThanOrder) {
+			throw new Exception("The order quantity is greater than the stock quantity");
+		}
 	}
 
 	public void update(Long id, OrderDto orderDto) throws Exception {

@@ -24,7 +24,7 @@ import com.api.ordermanager.service.OrderService;
 @RestController
 @RequestMapping("/orders")
 public class OrderController {
-	
+
 	private OrderService service;
 
 	@Autowired
@@ -39,8 +39,14 @@ public class OrderController {
 
 	@PostMapping
 	@ResponseStatus(HttpStatus.CREATED)
-	public ResponseEntity<Order> create(@Valid @RequestBody OrderDto orderDto) {
-		return ResponseEntity.ok(service.create(orderDto));
+	public ResponseEntity create(@Valid @RequestBody OrderDto orderDto) {
+		try {
+
+			return ResponseEntity.ok(service.create(orderDto));
+
+		} catch (Exception e) {
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error message: " + e.getMessage());
+		}
 	}
 
 	@PutMapping("/{id}")

@@ -66,19 +66,36 @@ public class StockMovementService {
 
 	}
 
-	public boolean checkItemAndQuantity(Long itemId, Integer quantity) {
+	public boolean checkItemAndQuantity(Long itemId, Integer orderQuantity) throws Exception {
 
-		Optional<Item> itemFound = itemService.getById(itemId);
-		if (itemFound.isPresent()) {
-			Optional<StockMovement> stockMovement = repository.findByItemId(itemFound.get().getId());
-			if (stockMovement.isPresent()) {
+		Optional<Item> item = itemService.getById(itemId);
 
-				long stockQuantity = stockMovement.get().getQuantity();
-				return quantity > stockQuantity ? false : true;
-
-			}
+		if (!item.isPresent()) {
+			throw new Exception("Item not found");
 		}
 
-		return false;
+		Optional<StockMovement> stockMovement = repository.findByItemId(item.get().getId());
+
+		if (!stockMovement.isPresent()) {
+			throw new Exception("Stock movement not found");
+		}
+
+		int stockQuantity = stockMovement.get().getQuantity();
+
+		return orderQuantity <= stockQuantity;
+	}
+
+	public void updateQuantity(Long itemId, Integer orderQuantity) {
+		Optional<Item> item = itemService.getById(itemId);
+		Optional<StockMovement> stockMovement = repository.findByItemId(item.get().getId());
+		
+		int stockQuantity = stockMovement.get().getQuantity();
+		
+		if (orderQuantity <= stockQuantity) {
+			stockMovement.get().setQuantity(stockQuantity - orderQuantity);
+			repository.save(stockMovement.get());
+
+		}
+
 	}
 }
