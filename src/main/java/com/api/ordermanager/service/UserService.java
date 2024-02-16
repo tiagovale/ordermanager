@@ -16,7 +16,7 @@ import com.api.ordermanager.repository.UserRepository;
 public class UserService {
 
 	@Autowired
-	private  UserRepository repository;
+	private UserRepository repository;
 
 	public List<User> getAll() {
 		return repository.findAll();
@@ -35,7 +35,7 @@ public class UserService {
 		return null;
 
 	}
-	
+
 	public void update(Long id, UserDto userDto) throws Exception {
 
 		User user = repository.findById(id).orElseThrow(() -> new Exception("User not found"));
@@ -59,5 +59,9 @@ public class UserService {
 			System.out.println("Error message" + e.getMessage());
 		}
 
+	}
+
+	public Optional<User> findById(Long id) {
+		return repository.findById(id);
 	}
 }

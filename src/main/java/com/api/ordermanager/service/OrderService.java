@@ -17,6 +17,7 @@ public class OrderService {
 
 	@Autowired
 	private OrderRepository repository;
+	
 
 	@Autowired
 	private StockMovementService stockMovementService;
@@ -29,17 +30,16 @@ public class OrderService {
 	public Order create(OrderDto orderDto) throws Exception {
 
 		validateStockQuantity(orderDto);
-		updateStock(orderDto.getItem().getId(), orderDto.getQuantity());
+		updateStock(orderDto);
 
 		Order order = OrderMapper.mapToEntity(orderDto);
 		return repository.save(order);
 
 	}
 
-	private void updateStock(Long itemId, Integer orderQuantity) {
+	private void updateStock(OrderDto orderDto) throws Exception {
 	
-		stockMovementService.updateQuantity(itemId,
-				orderQuantity);
+		stockMovementService.updateQuantity(orderDto);
 	}
 
 	private void validateStockQuantity(OrderDto orderDto) throws Exception {
@@ -52,10 +52,10 @@ public class OrderService {
 
 	public void update(Long id, OrderDto orderDto) throws Exception {
 
-		Order order = repository.findById(id).orElseThrow(() -> new Exception("Order not found"));
+		Optional<Order> order = repository.findById(id);
 
 		Order orderToUpdate = OrderMapper.mapToEntity(orderDto);
-		orderToUpdate.setId(order.getId());
+		orderToUpdate.setId(order.get().getId());
 		repository.save(orderToUpdate);
 
 	}

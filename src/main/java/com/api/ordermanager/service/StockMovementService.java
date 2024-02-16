@@ -7,10 +7,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.api.ordermanager.dto.OrderDto;
 import com.api.ordermanager.dto.StockMovementDto;
 import com.api.ordermanager.mapper.StockMovementMapper;
 import com.api.ordermanager.model.Item;
 import com.api.ordermanager.model.StockMovement;
+import com.api.ordermanager.model.User;
 import com.api.ordermanager.repository.StockMovementRepository;
 
 @Service
@@ -21,6 +23,12 @@ public class StockMovementService {
 
 	@Autowired
 	private ItemService itemService;
+	
+	@Autowired
+	private UserService userService;
+	
+	@Autowired
+	private EmailSenderService emailSenderService;
 
 	public List<StockMovement> getAll() {
 		return repository.findAll();
@@ -85,15 +93,21 @@ public class StockMovementService {
 		return orderQuantity <= stockQuantity;
 	}
 
-	public void updateQuantity(Long itemId, Integer orderQuantity) {
-		Optional<Item> item = itemService.getById(itemId);
+	public void updateQuantity(OrderDto orderDto) throws Exception {
+		Optional<Item> item = itemService.getById(orderDto.getItem().getId());
 		Optional<StockMovement> stockMovement = repository.findByItemId(item.get().getId());
+		Optional<User> user = userService.findById(orderDto.getUser().getId());
+		if(!user.isPresent()) {
+			throw new Exception("User not found");
+		}
 		
 		int stockQuantity = stockMovement.get().getQuantity();
+		int orderQuantity = orderDto.getQuantity();
 		
-		if (orderQuantity <= stockQuantity) {
+		if (orderDto.getQuantity() <= stockQuantity) {
 			stockMovement.get().setQuantity(stockQuantity - orderQuantity);
 			repository.save(stockMovement.get());
+			emailSenderService.sendSimpleEmail(user.get().getEmail(), "Order situation", String.format("Mr  %s your order is complete", user.get().getName()));
 
 		}
 
